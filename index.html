@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rankeia — SEO para Marketplaces</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ================================================
+     AUTH SHELL — Login / Cadastro
+================================================ -->
+<div id="authShell">
+
+  <!-- Tela de Login -->
+  <div class="auth-screen active" id="screen-auth-login">
+    <div class="auth-logo">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="logo-grad-login" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#5200CC"/>
+            <stop offset="100%" stop-color="#7B3FF2"/>
+          </linearGradient>
+        </defs>
+        <rect width="48" height="48" rx="12" fill="url(#logo-grad-login)"/>
+        <polyline points="8,36 18,24 26,30 40,14"
+          stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="18" cy="24" r="2.5" fill="white"/>
+        <circle cx="26" cy="30" r="2.5" fill="white"/>
+        <circle cx="40" cy="14" r="2.5" fill="white"/>
+      </svg>
+      <div class="auth-logo-word">rankeia</div>
+      <div class="auth-logo-sub">marketplaces</div>
+    </div>
+
+    <img src="mascote-rank-acenando.png" alt="Mascote Rankeia" class="mascote-login">
+
+    <div class="auth-card">
+      <h2>Bem-vindo de volta</h2>
+      <p class="auth-sub">Entre na sua conta para continuar</p>
+
+      <!-- Login com Google -->
+      <button class="btn-google" onclick="doGoogleLogin()">
+        <svg viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.8 2.5 30.3 0 24 0 14.7 0 6.7 5.5 2.7 13.5l7.8 6C12.3 13.3 17.7 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8C43.5 37.5 46.5 31.5 46.5 24.5z"/>
+          <path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.1.7-4.6l-7.8-6A23.9 23.9 0 0 0 0 24c0 3.9.9 7.6 2.7 10.8l7.8-6.1z"/>
+          <path fill="#34A853" d="M24 48c6.3 0 11.6-2.1 15.5-5.7l-7.5-5.8c-2.1 1.4-4.8 2.3-8 2.3-6.3 0-11.7-4.3-13.5-10l-7.8 6C6.7 42.5 14.7 48 24 48z"/>
+        </svg>
+        Entrar com Google
+      </button>
+
+      <div class="auth-divider"><span>ou use seu e-mail</span></div>
+
+      <form id="loginForm" class="auth-form">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">E-MAIL</label>
+          <input class="form-input" type="email" id="loginEmail" placeholder="seu@email.com" required autocomplete="email">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">SENHA</label>
+          <input class="form-input" type="password" id="loginPass" placeholder="••••••••" required autocomplete="current-password">
+          <span class="forgot-link" onclick="doResetPassword()">Esqueci minha senha</span>
+        </div>
+        <button class="btn-primary" type="submit" id="loginBtn" style="margin-top:8px;">Entrar</button>
+      </form>
+    </div>
+
+    <div class="auth-switch">
+      Não tem conta? <a onclick="showRegister()">Criar conta grátis →</a>
+    </div>
+  </div>
+
+  <!-- Tela de Cadastro -->
+  <div class="auth-screen" id="screen-auth-register">
+    <div class="auth-logo" style="margin-bottom:20px;">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="logo-grad-reg" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#5200CC"/>
+            <stop offset="100%" stop-color="#7B3FF2"/>
+          </linearGradient>
+        </defs>
+        <rect width="48" height="48" rx="12" fill="url(#logo-grad-reg)"/>
+        <polyline points="8,36 18,24 26,30 40,14"
+          stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="18" cy="24" r="2.5" fill="white"/>
+        <circle cx="26" cy="30" r="2.5" fill="white"/>
+        <circle cx="40" cy="14" r="2.5" fill="white"/>
+      </svg>
+      <div class="auth-logo-word" style="font-size:22px;">rankeia</div>
+      <div class="auth-logo-sub">marketplaces</div>
+    </div>
+
+    <div class="auth-card">
+      <h2>Criar conta</h2>
+      <p class="auth-sub">Comece a ranquear seus anúncios hoje</p>
+
+      <form id="registerForm" class="auth-form">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">SEU NOME</label>
+          <input class="form-input" type="text" id="regNome" placeholder="Como devemos te chamar?" required>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">E-MAIL</label>
+          <input class="form-input" type="email" id="regEmail" placeholder="seu@email.com" required autocomplete="email">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">SENHA</label>
+          <input class="form-input" type="password" id="regPass" placeholder="Mínimo 6 caracteres" required autocomplete="new-password">
+        </div>
+        <button class="btn-primary" type="submit" id="registerBtn" style="margin-top:8px;">Criar conta</button>
+      </form>
+
+      <div class="auth-divider" style="margin:16px 0 0;"><span>ou</span></div>
+      <button class="btn-google" onclick="doGoogleLogin()" style="margin-top:12px;">
+        <svg viewBox="0 0 48 48" width="18" height="18">
+          <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.8 2.5 30.3 0 24 0 14.7 0 6.7 5.5 2.7 13.5l7.8 6C12.3 13.3 17.7 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8C43.5 37.5 46.5 31.5 46.5 24.5z"/>
+          <path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.1.7-4.6l-7.8-6A23.9 23.9 0 0 0 0 24c0 3.9.9 7.6 2.7 10.8l7.8-6.1z"/>
+          <path fill="#34A853" d="M24 48c6.3 0 11.6-2.1 15.5-5.7l-7.5-5.8c-2.1 1.4-4.8 2.3-8 2.3-6.3 0-11.7-4.3-13.5-10l-7.8 6C6.7 42.5 14.7 48 24 48z"/>
+        </svg>
+        Entrar com Google
+      </button>
+    </div>
+
+    <div class="auth-switch">
+      Já tem conta? <a onclick="showLogin()">Fazer login →</a>
+    </div>
+  </div>
+
+</div><!-- /#authShell -->
+
+
+<!-- ================================================
+     APP SHELL — 4 telas
+================================================ -->
+<div id="appShell" style="display:none;">
+
+  <!-- ══════════════════════
+       TELA 1 — HOME
+  ══════════════════════ -->
+  <div class="screen" id="screen-home">
+
+    <div class="home-header">
+      <div class="user-greeting">
+        <svg width="36" height="36" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <defs>
+            <linearGradient id="logo-grad-nav" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#5200CC"/>
+              <stop offset="100%" stop-color="#7B3FF2"/>
+            </linearGradient>
+          </defs>
+          <rect width="48" height="48" rx="12" fill="url(#logo-grad-nav)"/>
+          <polyline points="8,36 18,24 26,30 40,14"
+            stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle cx="18" cy="24" r="2.5" fill="white"/>
+          <circle cx="26" cy="30" r="2.5" fill="white"/>
+          <circle cx="40" cy="14" r="2.5" fill="white"/>
+        </svg>
+        <div class="greeting-text">
+          <h2 id="homeGreeting">Ola</h2>
+          <p>Pronto para ranquear hoje?</p>
+        </div>
+      </div>
+      <div class="notif-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Card destaque -->
+    <div class="highlight-card">
+      <div class="hl-label">ANÚNCIOS GERADOS</div>
+      <div class="hl-number" id="homeTotal">0</div>
+      <div class="hl-sub">este mês</div>
+      <hr class="hl-divider">
+      <div class="hl-mini">
+        <div class="mini-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          <span class="mini-card-txt">Hoje: <strong id="homeHoje">0</strong></span>
+        </div>
+        <div class="mini-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="mini-card-txt">Salvos: <strong id="homeSalvos">0</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid de marketplaces -->
+    <div class="section">
+      <div class="section-title">Gerar para qual plataforma?</div>
+      <div class="marketplace-grid">
+        <div class="marketplace-card" onclick="goToGenerateWith('mercado_livre')">
+          <div class="mp-dot" style="background:#FFE600"></div>
+          <div class="mp-name">Mercado Livre</div>
+          <div class="mp-type">SEO Técnico</div>
+        </div>
+        <div class="marketplace-card" onclick="goToGenerateWith('shopee')">
+          <div class="mp-dot" style="background:#EE4D2D"></div>
+          <div class="mp-name">Shopee</div>
+          <div class="mp-type">SEO Social</div>
+        </div>
+        <div class="marketplace-card" onclick="goToGenerateWith('amazon')">
+          <div class="mp-dot" style="background:#FF9900"></div>
+          <div class="mp-name">Amazon</div>
+          <div class="mp-type">Bullet Points</div>
+        </div>
+        <div class="marketplace-card" onclick="goToGenerateWith('tiktok_shop')">
+          <div class="mp-dot" style="background:#FF0050"></div>
+          <div class="mp-name">TikTok Shop</div>
+          <div class="mp-type">SEO Viral</div>
+        </div>
+        <div class="marketplace-card" onclick="goToGenerateWith('magalu')">
+          <div class="mp-dot" style="background:#0086FF"></div>
+          <div class="mp-name">Magalu</div>
+          <div class="mp-type">Google Shopping</div>
+        </div>
+        <div class="marketplace-card featured" onclick="goToGenerateWith('all')">
+          <div class="mp-dot" style="background:#A878FF"></div>
+          <div class="mp-name">Todas</div>
+          <div class="mp-type">Multi-plataforma</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recentes -->
+    <div class="section" style="padding-bottom:20px;">
+      <div class="section-title">Gerados recentemente</div>
+      <div id="recentList">
+        <div class="card"><div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+            <rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/>
+          </svg>
+          <p>Seus anúncios aparecem aqui</p>
+        </div></div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ══════════════════════
+       TELA 2 — GERAR
+  ══════════════════════ -->
+  <div class="screen" id="screen-generate">
+
+    <div class="generate-header">
+      <div class="back-btn" onclick="navigateTo('home')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </div>
+      <h2>Novo Anúncio</h2>
+    </div>
+
+    <!-- Step indicator -->
+    <div class="step-indicator">
+      <div class="step active" id="step1">
+        <div class="step-circle">1</div>
+        <div class="step-label">Produto</div>
+      </div>
+      <div class="step-line" id="line1"></div>
+      <div class="step" id="step2">
+        <div class="step-circle">2</div>
+        <div class="step-label">Plataformas</div>
+      </div>
+      <div class="step-line" id="line2"></div>
+      <div class="step" id="step3">
+        <div class="step-circle">3</div>
+        <div class="step-label">Resultado</div>
+      </div>
+    </div>
+
+    <!-- STEP 1 — Produto -->
+    <div id="s1" class="form-content">
+      <div class="form-group">
+        <label class="form-label">NOME OU DESCRIÇÃO DO PRODUTO</label>
+        <textarea class="form-textarea" id="fProduct" placeholder="Ex: Camiseta dry fit masculina azul marinho tamanho M"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">CATEGORIA</label>
+        <input class="form-input" id="fCategory" type="text" placeholder="Ex: Roupas Masculinas">
+      </div>
+      <div class="form-group">
+        <label class="form-label">DIFERENCIAIS <span style="color:var(--muted);font-size:10px;">(opcional)</span></label>
+        <input class="form-input" id="fDiff" type="text" placeholder="Ex: Tecido anti-suor, proteção UV 50+">
+      </div>
+      <button class="btn-primary" onclick="goStep2()">Próximo →</button>
+    </div>
+
+    <!-- STEP 2 — Plataformas -->
+    <div id="s2" class="form-content" style="display:none;">
+      <p class="form-label" style="margin-bottom:14px;">ESCOLHA AS PLATAFORMAS</p>
+      <div class="platform-grid">
+        <div class="platform-toggle" data-p="mercado_livre" onclick="togglePlatform(this)">
+          <div class="pt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pt-dot" style="background:#FFE600"></div>
+          <div class="pt-name">Mercado Livre</div>
+          <div class="pt-badge">SEO Técnico</div>
+        </div>
+        <div class="platform-toggle" data-p="shopee" onclick="togglePlatform(this)">
+          <div class="pt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pt-dot" style="background:#EE4D2D"></div>
+          <div class="pt-name">Shopee</div>
+          <div class="pt-badge">SEO Social</div>
+        </div>
+        <div class="platform-toggle" data-p="amazon" onclick="togglePlatform(this)">
+          <div class="pt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pt-dot" style="background:#FF9900"></div>
+          <div class="pt-name">Amazon</div>
+          <div class="pt-badge">Bullet Points</div>
+        </div>
+        <div class="platform-toggle" data-p="tiktok_shop" onclick="togglePlatform(this)">
+          <div class="pt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pt-dot" style="background:#FF0050"></div>
+          <div class="pt-name">TikTok Shop</div>
+          <div class="pt-badge">SEO Viral</div>
+        </div>
+        <div class="platform-toggle" data-p="magalu" onclick="togglePlatform(this)">
+          <div class="pt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pt-dot" style="background:#0086FF"></div>
+          <div class="pt-name">Magalu</div>
+          <div class="pt-badge">Google Shopping</div>
+        </div>
+        <div class="platform-toggle" data-p="americanas" onclick="togglePlatform(this)">
+          <div class="pt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pt-dot" style="background:#E60000"></div>
+          <div class="pt-name">Americanas</div>
+          <div class="pt-badge">SEO Amplo</div>
+        </div>
+      </div>
+
+      <div class="toggle-row" id="tiktokToggleRow" style="display:none;">
+        <span class="toggle-label">Incluir script de vídeo 15s</span>
+        <div class="toggle-switch" id="tiktokScriptSw" onclick="this.classList.toggle('on')"></div>
+      </div>
+
+      <button class="btn-primary" onclick="generateAd()">Gerar Anúncio</button>
+    </div>
+
+    <!-- STEP 3 — Resultado -->
+    <div id="s3" style="display:none;">
+
+      <!-- Loading -->
+      <div class="loading-state" id="loadingState">
+        <img src="mascote-rank-trabalhando.png" alt="Gerando anúncio..." class="mascote-loading">
+        <div class="loading-text" id="loadText">Analisando palavras-chave...</div>
+        <div class="loading-bar-wrap">
+          <div class="loading-bar" id="loadBar"></div>
+        </div>
+      </div>
+
+      <!-- Resultado -->
+      <div id="resultState" class="result-content" style="display:none;">
+        <img src="mascote-rank-joinha.png" alt="Anuncio gerado!" class="mascote-resultado">
+        <div id="resultCards"></div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+          <button class="btn-primary"  onclick="doSaveHistory()">Salvar no histórico</button>
+          <button class="btn-outline"  onclick="reGenerate()">Gerar novamente</button>
+          <button class="btn-ghost"    onclick="resetGenerate()">Novo anúncio</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ══════════════════════
+       TELA 3 — HISTÓRICO
+  ══════════════════════ -->
+  <div class="screen" id="screen-history">
+
+    <div class="app-header">
+      <span class="header-title">Meus Anúncios</span>
+    </div>
+
+    <div class="filter-scroll">
+      <div class="filter-chip active" onclick="setFilter(this,'all')">Todos</div>
+      <div class="filter-chip" onclick="setFilter(this,'mercado_livre')">Mercado Livre</div>
+      <div class="filter-chip" onclick="setFilter(this,'shopee')">Shopee</div>
+      <div class="filter-chip" onclick="setFilter(this,'amazon')">Amazon</div>
+      <div class="filter-chip" onclick="setFilter(this,'tiktok_shop')">TikTok</div>
+      <div class="filter-chip" onclick="setFilter(this,'magalu')">Magalu</div>
+    </div>
+
+    <div class="history-list" id="historyList"></div>
+
+  </div>
+
+
+  <!-- ══════════════════════
+       TELA 4 — CONTA
+  ══════════════════════ -->
+  <div class="screen" id="screen-account">
+
+    <div class="app-header">
+      <span class="header-title">Conta</span>
+    </div>
+
+    <div class="account-hero">
+      <div class="account-avatar" id="acctAvatar">?</div>
+      <div class="account-name"  id="acctName">Usuário</div>
+      <div class="account-email" id="acctEmail"></div>
+    </div>
+
+    <!-- Card de plano -->
+    <div class="plan-card">
+      <div class="plan-badge">PLANO STARTER</div>
+      <div class="plan-price">R$47<span>/mês</span></div>
+      <div class="plan-usage-label" id="planLabel">0/30 anúncios este mês</div>
+      <div class="usage-bar-wrap"><div class="usage-bar" id="usageBar" style="width:0%"></div></div>
+    </div>
+
+    <!-- API Key -->
+    <div class="settings-section">
+      <div class="settings-title">API KEY ANTHROPIC</div>
+      <div class="api-wrap">
+        <input class="api-input" type="password" id="apiKeyInput" placeholder="sk-ant-...">
+        <button class="eye-btn" onclick="toggleApiVis()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+      <a class="api-link" href="https://console.anthropic.com" target="_blank">Obter API Key →</a>
+      <button class="btn-primary" onclick="saveApiKey()" style="margin-bottom:8px;">Salvar API Key</button>
+    </div>
+
+    <!-- Configurações -->
+    <div class="settings-section">
+      <div class="settings-title">CONFIGURAÇÕES</div>
+      <div class="toggle-row">
+        <span class="toggle-label">Salvar histórico automaticamente</span>
+        <div class="toggle-switch on" id="autoSaveSw" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">Notificações</span>
+        <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">Idioma</span>
+        <select style="background:transparent;border:none;color:var(--muted);font-size:13px;cursor:pointer;outline:none;">
+          <option>Português BR</option>
+          <option>English</option>
+          <option>Español</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="settings-section">
+      <div class="settings-title">SUAS ESTATÍSTICAS</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="stTotal">0</div><div class="stat-label">Total gerado</div></div>
+        <div class="stat-card"><div class="stat-value" id="stWeek">0</div><div class="stat-label">Esta semana</div></div>
+        <div class="stat-card"><div class="stat-value" id="stFav">—</div><div class="stat-label">Plataforma favorita</div></div>
+        <div class="stat-card"><div class="stat-value" id="stTime">0h</div><div class="stat-label">Tempo economizado</div></div>
+      </div>
+    </div>
+
+    <!-- Logout -->
+    <button class="logout-btn" onclick="doLogout()">Sair da conta</button>
+
+    <!-- Footer -->
+    <div class="account-footer">
+      <p>rankeia · powered by Bro System</p>
+      <div class="footer-links">
+        <a href="#">Termos</a>
+        <a href="#">Privacidade</a>
+        <a href="#">Suporte</a>
+      </div>
+      <p style="font-size:11px;color:#444;">v2.0.0 · Firebase Edition</p>
+    </div>
+
+  </div>
+
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="navigateTo('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Início</span>
+    </div>
+    <div class="nav-center" id="nav-generate" onclick="navigateTo('generate');resetGenerate();">
+      <div class="nav-center-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+      <span>Gerar</span>
+    </div>
+    <div class="nav-item" id="nav-history" onclick="navigateTo('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Histórico</span>
+    </div>
+    <div class="nav-item" id="nav-account" onclick="navigateTo('account')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Conta</span>
+    </div>
+  </div>
+
+</div><!-- /#appShell -->
+
+
+<!-- Overlay detalhe histórico -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-header">
+    <div class="back-btn" onclick="closeDetail()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </div>
+    <div class="detail-title" id="detailTitle">Detalhes</div>
+  </div>
+  <div id="detailBody" style="padding:0 20px 60px;"></div>
+</div>
+
+<!-- Scripts -->
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/db.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
