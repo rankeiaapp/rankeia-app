@@ -14,7 +14,7 @@ const FIREBASE_CONFIG = {
 
 // Anthropic — cole sua sk-ant-... aqui ou configure em Configurações dentro do app
 // ⚠️ Nunca commite a chave real — cole-a diretamente em Configurações dentro do app
-const ANTHROPIC_API_KEY = "";
+const ANTHROPIC_API_KEY = window.ENV_ANTHROPIC_API_KEY || "";
 const ANTHROPIC_MODEL   = "claude-sonnet-4-20250514";
 const ANTHROPIC_TOKENS  = 1800;
 
