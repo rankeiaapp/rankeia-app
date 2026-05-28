@@ -34,9 +34,10 @@ async function loadUserProfile() {
     userProfile = {
       nome:        currentUser.displayName || 'Usuário',
       email:       currentUser.email,
-      plano:       'starter',
+      plano:       'free',
       apiKey:      '',
       totalGerado: 0,
+      geracoesUsadas: 0,
     };
   }
 }
@@ -48,6 +49,38 @@ async function updateProfile(data) {
   userProfile = { ...userProfile, ...data };
 }
 
+// ──────────────────────────
+// Controle de Plano / Paywall
+// ──────────────────────────
+
+// Verifica se usuário pode gerar
+function canGenerate() {
+  if (!userProfile) return false;
+  const plano = userProfile.plano || 'free';
+  if (plano === 'basico' || plano === 'pro') return true;
+  // free: 1 geração grátis
+  const usadas = userProfile.geracoesUsadas || 0;
+  return usadas < 1;
+}
+
+// Retorna o plano atual
+function getPlano() {
+  return userProfile?.plano || 'free';
+}
+
+// Incrementa contador de gerações
+async function incrementGeracoes() {
+  if (!currentUser) return;
+  const novoTotal = (userProfile.totalGerado || 0) + 1;
+  const novasUsadas = (userProfile.geracoesUsadas || 0) + 1;
+  await firebaseDB.collection('users').doc(currentUser.uid).update({
+    totalGerado: firebase.firestore.FieldValue.increment(1),
+    geracoesUsadas: firebase.firestore.FieldValue.increment(1),
+  });
+  userProfile.totalGerado = novoTotal;
+  userProfile.geracoesUsadas = novasUsadas;
+}
+
 // Salvar anúncio no histórico
 async function saveAnuncio(data) {
   if (!currentUser) return;
@@ -57,11 +90,6 @@ async function saveAnuncio(data) {
       ...data,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
-  // Incrementar contador
-  await firebaseDB.collection('users').doc(currentUser.uid).update({
-    totalGerado: firebase.firestore.FieldValue.increment(1),
-  });
-  userProfile.totalGerado = (userProfile.totalGerado || 0) + 1;
   return ref.id;
 }
 
@@ -94,7 +122,6 @@ async function deleteAnuncio(id) {
 // Buscar stats
 async function getStats() {
   if (!currentUser) return {};
-  // Stats da semana atual
   const weekStart = getWeekStart();
   const snap = await firebaseDB
     .collection('users').doc(currentUser.uid)
@@ -103,7 +130,6 @@ async function getStats() {
     .get();
   const estaSemana = snap.size;
 
-  // Plataforma favorita
   const allSnap = await firebaseDB
     .collection('users').doc(currentUser.uid)
     .collection('historico')

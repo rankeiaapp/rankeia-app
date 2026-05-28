@@ -2,6 +2,10 @@
    APP — Controlador Principal
 ============================================================ */
 
+// Links Kiwify
+const KIWIFY_BASICO = "https://pay.kiwify.com.br/8kFuuO9";
+const KIWIFY_PRO    = "https://pay.kiwify.com.br/h7sjuGO";
+
 // ──────────────────────────
 // Estado do Gerador
 // ──────────────────────────
@@ -25,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // Auth Forms
 // ──────────────────────────
 function bindAuthForms() {
-  // Login form
   document.getElementById('loginForm')?.addEventListener('submit', async e => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
@@ -40,7 +43,6 @@ function bindAuthForms() {
     }
   });
 
-  // Register form
   document.getElementById('registerForm')?.addEventListener('submit', async e => {
     e.preventDefault();
     const nome  = document.getElementById('regNome').value.trim();
@@ -71,13 +73,12 @@ function friendlyAuthError(code) {
   return msgs[code] || 'Erro de autenticação. Tente novamente.';
 }
 
-// Trocar entre telas de auth
 function showLogin()    { showScreen('auth-login');    }
 function showRegister() { showScreen('auth-register'); }
 
 async function doLogout() {
   await logout();
-  toast('Até logo! 👋', 'info');
+  toast('Até logo!', 'info');
 }
 
 async function doGoogleLogin() {
@@ -125,7 +126,7 @@ async function saveApiKey() {
 }
 
 // ──────────────────────────
-// Navegação para Gerar com plataforma pré-selecionada
+// Navegação
 // ──────────────────────────
 function goToGenerateWith(platform) {
   navigateTo('generate');
@@ -191,10 +192,16 @@ function togglePlatform(card) {
 }
 
 // ──────────────────────────
-// Gerar Anúncio
+// Gerar Anúncio — com paywall
 // ──────────────────────────
 async function generateAd() {
   if (!selectedPlatforms.length) { toast('Selecione ao menos uma plataforma!', 'error'); return; }
+
+  // ── PAYWALL: verificar se pode gerar ──
+  if (!canGenerate()) {
+    showUpgradeModal();
+    return;
+  }
 
   const product   = document.getElementById('fProduct')?.value.trim()   || '';
   const category  = document.getElementById('fCategory')?.value.trim()  || '';
@@ -204,7 +211,6 @@ async function generateAd() {
 
   lastProductData = { product, category, diff, platforms:[...selectedPlatforms], tiktokSc };
 
-  // Ir para step 3 / loading
   currentStep = 3;
   showStepContent(3);
   updateStepUI();
@@ -213,10 +219,13 @@ async function generateAd() {
   try {
     const result = await gerarAnuncio({ product, category, diff, platforms: selectedPlatforms, tiktokScript: tiktokSc });
     lastResult = result;
+
+    // Incrementar contador de gerações
+    await incrementGeracoes();
+
     showLoading(false);
     renderResult(result, selectedPlatforms, tiktokSc);
 
-    // Auto-save
     const autoSave = document.getElementById('autoSaveSw')?.classList.contains('on');
     if (autoSave !== false) await doSaveHistory(true);
 
@@ -277,6 +286,24 @@ function animateBar() {
     if (pct < 95) barTimer = setTimeout(step, 200);
   }
   barTimer = setTimeout(step, 200);
+}
+
+// ──────────────────────────
+// Modal de Upgrade (Paywall)
+// ──────────────────────────
+function showUpgradeModal(planFocus) {
+  const modal = document.getElementById('upgradeModal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeUpgradeModal() {
+  const modal = document.getElementById('upgradeModal');
+  if (modal) modal.classList.remove('open');
+}
+
+function goToCheckout(plan) {
+  const url = plan === 'pro' ? KIWIFY_PRO : KIWIFY_BASICO;
+  window.open(url, '_blank');
 }
 
 // ──────────────────────────

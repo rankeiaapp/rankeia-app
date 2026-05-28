@@ -720,4 +720,211 @@ body {
 ────────────────────────── */
 ::-webkit-scrollbar { width:3px; }
 ::-webkit-scrollbar-track { background:transparent; }
+
+/* ──────────────────────────
+   MODAL DE UPGRADE — Paywall
+────────────────────────── */
+.upgrade-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 9999;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+.upgrade-overlay.open { display: flex; }
+
+.upgrade-modal {
+  background: #1E1E2E;
+  border-radius: 24px 24px 0 0;
+  padding: 28px 20px 40px;
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+  text-align: center;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.upgrade-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255,255,255,0.08);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #aaa;
+}
+
+.upgrade-mascote {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 12px;
+}
+
+.upgrade-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 20px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.upgrade-sub {
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.upgrade-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #5200CC, #7B3FF2);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.upgrade-plans {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.upgrade-plan {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 16px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s;
+  position: relative;
+}
+
+.upgrade-plan.featured {
+  border-color: #7B3FF2;
+  background: rgba(123,63,242,0.12);
+}
+
+.plan-popular {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #7B3FF2;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.plan-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.plan-desc {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.plan-price-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.plan-price-old {
+  font-size: 12px;
+  color: #666;
+  text-decoration: line-through;
+}
+
+.plan-price-new {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  color: #fff;
+}
+
+.plan-freq {
+  font-size: 12px;
+  font-weight: 400;
+  color: #888;
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px;
+}
+
+.plan-features li {
+  font-size: 11px;
+  color: #ccc;
+  padding: 3px 0;
+  padding-left: 14px;
+  position: relative;
+}
+
+.plan-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #7B3FF2;
+  font-weight: 700;
+}
+
+.btn-plan-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #5200CC, #7B3FF2);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-plan-outline {
+  width: 100%;
+  background: transparent;
+  color: #7B3FF2;
+  border: 1px solid #7B3FF2;
+  border-radius: 10px;
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.upgrade-footer {
+  font-size: 11px;
+  color: #555;
+  margin: 0;
+}
 ::-webkit-scrollbar-thumb { background:rgba(123,63,242,0.3); border-radius:2px; }

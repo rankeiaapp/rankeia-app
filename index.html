@@ -544,6 +544,74 @@
   <div id="detailBody" style="padding:0 20px 60px;"></div>
 </div>
 
+<!-- ================================================
+     MODAL DE UPGRADE — Kiwify
+================================================ -->
+
+<div class="upgrade-overlay" id="upgradeModal">
+  <div class="upgrade-modal">
+
+    <!-- Fechar -->
+    <button class="upgrade-close" onclick="closeUpgradeModal()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <!-- Mascote + headline -->
+    <img src="mascote-rank-trofeu.png" alt="Rank" class="upgrade-mascote">
+    <div class="upgrade-title">Sua geração grátis acabou</div>
+    <div class="upgrade-sub">Escolha um plano e continue gerando anúncios otimizados em 30 segundos</div>
+
+    <!-- Badge fundador -->
+    <div class="upgrade-badge">OFERTA FUNDADOR — Válida até 5 de junho</div>
+
+    <!-- Cards de plano -->
+    <div class="upgrade-plans">
+
+      <!-- Básico -->
+      <div class="upgrade-plan" onclick="goToCheckout('basico')">
+        <div class="plan-name">Básico</div>
+        <div class="plan-desc">1 marketplace</div>
+        <div class="plan-price-wrap">
+          <span class="plan-price-old">R$47</span>
+          <span class="plan-price-new">R$37<span class="plan-freq">/mês</span></span>
+        </div>
+        <ul class="plan-features">
+          <li>1 marketplace à sua escolha</li>
+          <li>Gerações ilimitadas</li>
+          <li>Título + Descrição + Tags</li>
+          <li>Histórico completo</li>
+        </ul>
+        <button class="btn-plan-outline">Assinar Básico →</button>
+      </div>
+
+      <!-- Pro (destaque) -->
+      <div class="upgrade-plan featured" onclick="goToCheckout('pro')">
+        <div class="plan-popular">MAIS POPULAR</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-desc">Todos os marketplaces</div>
+        <div class="plan-price-wrap">
+          <span class="plan-price-old">R$97</span>
+          <span class="plan-price-new">R$67<span class="plan-freq">/mês</span></span>
+        </div>
+        <ul class="plan-features">
+          <li>Mercado Livre, Shopee, Amazon</li>
+          <li>TikTok Shop e Magalu</li>
+          <li>Gerações ilimitadas</li>
+          <li>Script de vídeo 15s</li>
+          <li>Histórico completo</li>
+        </ul>
+        <button class="btn-plan-primary">Assinar Pro →</button>
+      </div>
+
+    </div>
+
+    <p class="upgrade-footer">Pagamento seguro via Kiwify · Cancele quando quiser</p>
+
+  </div>
+</div>
+
 <!-- Scripts -->
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
