@@ -1,0 +1,5 @@
+{
+  "buildCommand": "echo \"window.ENV_ANTHROPIC_API_KEY = '$ANTHROPIC_API_KEY';\" > env.js",
+  "outputDirectory": ".",
+  "framework": null
+}
