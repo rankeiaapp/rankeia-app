@@ -1,28 +1,8 @@
 // ============================================================
-//  /api/gerar  —  Backend seguro do Rankeia (Vercel Function)
-//  - Guarda a chave Anthropic no servidor (nunca vai ao browser)
-//  - Valida o token Firebase do usuário
-//  - Confere o plano e o limite de gerações no Firestore
-//  - Aplica rate limiting básico
+//  /api/gerar — Backend seguro do Rankeia (Opção B)
+//  Esconde a chave Anthropic no servidor. Sem firebase-admin.
 // ============================================================
 
-import admin from 'firebase-admin';
-
-// ---- Inicializa Firebase Admin (uma única vez) ----
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId:   process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      // a chave privada vem com \n escapado na env var
-      privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
-
-const db = admin.firestore();
-
-// ---- System prompt (mesmo do app) ----
 const SYSTEM_PROMPT = `Você é o motor de geração de anúncios do Rankeia, especialista em SEO e conversão para marketplaces brasileiros. Seu trabalho não é descrever produtos — é criar anúncios que RANQUEIAM nas buscas e CONVERTEM em venda, melhores do que o vendedor faria sozinho.
 
 REGRAS ABSOLUTAS (valem para todas as plataformas):
@@ -57,55 +37,33 @@ RETORNE APENAS JSON puro sem markdown:
 {"plataformas":{"mercado_livre":{"titulo":"...","descricao":"...","tags":["tag1"]},"shopee":{...},"amazon":{...},"tiktok_shop":{"titulo":"...","descricao":"...","tags":[...],"script_15s":{"hook":"...","produto":"...","cta":"..."}},"magalu":{...},"americanas":{...}}}
 Inclua apenas as plataformas solicitadas.`;
 
+const ALLOWED_ORIGINS = [
+  'https://app.rankeiapp.com.br',
+  'https://rankeia-app.vercel.app',
+];
+
 export default async function handler(req, res) {
-  // ---- Só aceita POST ----
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método não permitido' });
+  const origin = req.headers.origin || '';
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
   }
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
+  if (!ALLOWED_ORIGINS.includes(origin)) return res.status(403).json({ error: 'Origem não autorizada' });
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'Configuração do servidor incompleta' });
 
   try {
-    // ---- 1. Verifica o token do Firebase ----
-    const authHeader = req.headers.authorization || '';
-    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
-    if (!token) {
-      return res.status(401).json({ error: 'Não autenticado' });
-    }
-
-    let decoded;
-    try {
-      decoded = await admin.auth().verifyIdToken(token);
-    } catch {
-      return res.status(401).json({ error: 'Sessão inválida. Faça login novamente.' });
-    }
-    const uid = decoded.uid;
-
-    // ---- 2. Busca o perfil do usuário no Firestore ----
-    const userRef = db.collection('users').doc(uid);
-    const snap = await userRef.get();
-    if (!snap.exists) {
-      return res.status(403).json({ error: 'Perfil não encontrado.' });
-    }
-    const profile = snap.data();
-    const plano = profile.plano || 'free';
-    const geracoesUsadas = profile.geracoesUsadas || 0;
-
-    // ---- 3. Valida o plano / limite (paywall no servidor) ----
-    const isPago = plano === 'basico' || plano === 'pro';
-    if (!isPago && geracoesUsadas >= 1) {
-      return res.status(402).json({ error: 'PAYWALL', message: 'Geração grátis esgotada.' });
-    }
-
-    // ---- 4. Rate limiting básico (anti-abuso) ----
-    const agora = Date.now();
-    const ultimaGeracao = profile.ultimaGeracao?.toMillis?.() || 0;
-    if (agora - ultimaGeracao < 3000) {
-      return res.status(429).json({ error: 'Aguarde alguns segundos antes de gerar novamente.' });
-    }
-
-    // ---- 5. Monta a requisição ----
     const { product, category, diff, platforms, tiktokScript } = req.body || {};
-    if (!product || !Array.isArray(platforms) || !platforms.length) {
-      return res.status(400).json({ error: 'Dados incompletos.' });
+    if (!product || !Array.isArray(platforms) || platforms.length === 0) {
+      return res.status(400).json({ error: 'Dados incompletos' });
+    }
+    if (String(product).length > 500 || platforms.length > 6) {
+      return res.status(400).json({ error: 'Dados inválidos' });
     }
 
     const userMsg = `Produto: ${product}
@@ -114,12 +72,11 @@ Diferenciais: ${diff || 'Não informados'}
 Plataformas solicitadas: ${platforms.join(', ')}
 Script TikTok: ${tiktokScript ? 'sim' : 'não'}`;
 
-    // ---- 6. Chama a Anthropic (chave fica AQUI, no servidor) ----
     const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
@@ -132,7 +89,7 @@ Script TikTok: ${tiktokScript ? 'sim' : 'não'}`;
 
     if (!anthropicRes.ok) {
       const status = anthropicRes.status;
-      if (status === 429) return res.status(429).json({ error: 'Limite da IA atingido. Tente em instantes.' });
+      if (status === 429) return res.status(429).json({ error: 'Muitas requisições. Aguarde e tente novamente.' });
       return res.status(502).json({ error: 'Erro ao gerar. Tente novamente.' });
     }
 
@@ -140,25 +97,16 @@ Script TikTok: ${tiktokScript ? 'sim' : 'não'}`;
     const raw = data.content[0].text;
     const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
-    let result;
+    let parsed;
     try {
-      result = JSON.parse(clean);
+      parsed = JSON.parse(clean);
     } catch {
       return res.status(502).json({ error: 'Resposta inválida da IA. Tente novamente.' });
     }
 
-    // ---- 7. Incrementa o contador no servidor (fonte da verdade) ----
-    await userRef.update({
-      totalGerado: admin.firestore.FieldValue.increment(1),
-      geracoesUsadas: admin.firestore.FieldValue.increment(1),
-      ultimaGeracao: admin.firestore.FieldValue.serverTimestamp(),
-    });
-
-    // ---- 8. Devolve o resultado ----
-    return res.status(200).json(result);
+    return res.status(200).json(parsed);
 
   } catch (err) {
-    console.error('Erro /api/gerar:', err);
     return res.status(500).json({ error: 'Erro interno. Tente novamente.' });
   }
 }
