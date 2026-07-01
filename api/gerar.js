@@ -27,14 +27,12 @@ TIKTOK SHOP: Título até 80 caracteres, gancho + termo de busca. Descrição cu
 
 MAGALU: Título para busca por voz e Google Shopping. Descrição fluida indexável. Tags long-tail em formato de busca natural.
 
-AMERICANAS: Título descritivo categorizado. Descrição completa com medidas. Tags específicas.
-
 Não use emojis (exceto Shopee, se a regra permitir).
 
 Se categoria ou diferenciais não forem informados, INFIRA pelo nome do produto e gere com máxima especificidade. Nunca devolva conteúdo genérico por falta de input.
 
 RETORNE APENAS JSON puro sem markdown:
-{"plataformas":{"mercado_livre":{"titulo":"...","descricao":"...","tags":["tag1"]},"shopee":{...},"amazon":{...},"tiktok_shop":{"titulo":"...","descricao":"...","tags":[...],"script_15s":{"hook":"...","produto":"...","cta":"..."}},"magalu":{...},"americanas":{...}}}
+{"plataformas":{"mercado_livre":{"titulo":"...","descricao":"...","tags":["tag1"]},"shopee":{...},"amazon":{...},"tiktok_shop":{"titulo":"...","descricao":"...","tags":[...],"script_15s":{"hook":"...","produto":"...","cta":"..."}},"magalu":{...}}}
 Inclua apenas as plataformas solicitadas.`;
 
 const ALLOWED_ORIGINS = [

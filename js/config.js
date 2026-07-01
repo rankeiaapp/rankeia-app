@@ -25,5 +25,4 @@ const PLATFORMS = {
   amazon:        { name:"Amazon",        color:"#FF9900", maxTitle:200 },
   tiktok_shop:   { name:"TikTok Shop",   color:"#FF0050", maxTitle:80  },
   magalu:        { name:"Magalu",        color:"#0086FF", maxTitle:150 },
-  americanas:    { name:"Americanas",    color:"#E60000", maxTitle:150 },
 };
