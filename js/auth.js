@@ -70,3 +70,55 @@ async function loginWithGoogle() {
   }
   return res.user;
 }
+// ============================================================
+//  EXCLUIR CONTA — função para adicionar ao auth.js
+//  Apaga o histórico, o perfil no Firestore e a conta no Auth
+// ============================================================
+
+async function excluirConta() {
+  if (!currentUser) {
+    toast('Você precisa estar logado.', 'error');
+    return;
+  }
+
+  // Confirmação dupla — ação irreversível
+  const confirma = confirm(
+    'Tem certeza que deseja excluir sua conta?\n\n' +
+    'Isso apaga permanentemente:\n' +
+    '• Seu perfil\n' +
+    '• Todo o seu histórico de anúncios\n\n' +
+    'Esta ação não pode ser desfeita.'
+  );
+  if (!confirma) return;
+
+  try {
+    const uid = currentUser.uid;
+
+    // 1. Apagar todos os documentos do histórico
+    const histSnap = await firebaseDB
+      .collection('users').doc(uid)
+      .collection('historico').get();
+
+    const batch = firebaseDB.batch();
+    histSnap.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+
+    // 2. Apagar o documento do perfil
+    await firebaseDB.collection('users').doc(uid).delete();
+
+    // 3. Apagar a conta do Firebase Auth
+    await currentUser.delete();
+
+    toast('Sua conta foi excluída.', 'info');
+    // O onAuthStateChanged vai detectar o logout e voltar para a tela de login
+
+  } catch (err) {
+    // Firebase exige login recente para deletar a conta de Auth
+    if (err.code === 'auth/requires-recent-login') {
+      toast('Por segurança, faça login novamente antes de excluir a conta.', 'error');
+      await logout();
+    } else {
+      toast('Erro ao excluir conta. Tente novamente.', 'error');
+    }
+  }
+}

@@ -928,3 +928,19 @@ body {
   margin: 0;
 }
 ::-webkit-scrollbar-thumb { background:rgba(123,63,242,0.3); border-radius:2px; }
+
+.btn-excluir-conta {
+  width: 100%;
+  background: transparent;
+  color: #C0392B;
+  border: 1px solid #C0392B;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.btn-excluir-conta:hover {
+  background: rgba(192, 57, 43, 0.08);
+}

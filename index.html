@@ -122,7 +122,7 @@
           <label class="form-label">SENHA</label>
           <input class="form-input" type="password" id="regPass" placeholder="Mínimo 6 caracteres" required autocomplete="new-password">
         </div>
-        <button class="btn-primary" type="submit" id="registerBtn" style="margin-top:8px;">Criar conta</button>
+        <button class="btn-primary" type="submit" id="registerBtn" style="margin-top:8px;">Criar conta</button><p style="font-size:11px; color:#888; text-align:center; margin-top:12px; line-height:1.4;">Ao criar conta, você concorda com nossa <a href="https://www.rankeiapp.com.br/privacidade.html" target="_blank" style="color:#7B3FF2;">Política de Privacidade</a>.</p>	
       </form>
 
       <div class="auth-divider" style="margin:16px 0 0;"><span>ou</span></div>
@@ -480,15 +480,15 @@
     </div>
 
     <!-- Logout -->
-    <button class="logout-btn" onclick="doLogout()">Sair da conta</button>
+    <button class="logout-btn" onclick="doLogout()">Sair da conta</button><button class="btn-excluir-conta" onclick="excluirConta()">Excluir minha conta</button>
 
     <!-- Footer -->
     <div class="account-footer">
       <p>rankeia · powered by Bro System</p>
       <div class="footer-links">
-        <a href="#">Termos</a>
-        <a href="#">Privacidade</a>
-        <a href="#">Suporte</a>
+        <a href="https://www.rankeiapp.com.br/privacidade.html" target="_blank">Termos</a>
+        <a href="https://www.rankeiapp.com.br/privacidade.html" target="_blank">Privacidade</a>
+        <a href="mailto:contato.bromkt@gmail.com">Suporte</a>
       </div>
       <p style="font-size:11px;color:#444;">v2.0.0 · Firebase Edition</p>
     </div>
