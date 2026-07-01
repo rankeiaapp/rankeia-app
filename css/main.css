@@ -944,3 +944,18 @@ body {
 .btn-excluir-conta:hover {
   background: rgba(192, 57, 43, 0.08);
 }
+
+.btn-upgrade-conta {
+  width: 100%;
+  background: linear-gradient(135deg, #7B3FF2, #5200CC);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 14px;
+  transition: opacity 0.2s;
+}
+.btn-upgrade-conta:hover { opacity: 0.9; }

@@ -3,8 +3,8 @@
 ============================================================ */
 
 // Links Kiwify
-const KIWIFY_BASICO = "https://pay.kiwify.com.br/8kFuuO9";
-const KIWIFY_PRO    = "https://pay.kiwify.com.br/h7sjuGO";
+const KIWIFY_BASICO = "https://pay.kiwify.com.br/4hK6Gmm";
+const KIWIFY_PRO    = "https://pay.kiwify.com.br/rBtZOES";
 
 // ──────────────────────────
 // Estado do Gerador
