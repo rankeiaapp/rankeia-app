@@ -81,7 +81,7 @@ Script TikTok: ${tiktokScript ? 'sim' : 'não'}`;
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
-        max_tokens: 1800,
+        max_tokens: 8192,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: userMsg }],
       }),
@@ -94,13 +94,28 @@ Script TikTok: ${tiktokScript ? 'sim' : 'não'}`;
     }
 
     const data = await anthropicRes.json();
-    const raw = data.content[0].text;
+
+    // Se o modelo foi cortado pelo limite de tokens, o JSON vem incompleto.
+    // Avisa de forma clara em vez de devolver "resposta inválida" genérica.
+    if (data.stop_reason === 'max_tokens') {
+      return res.status(502).json({ error: 'Resposta muito longa. Gere menos plataformas por vez e tente novamente.' });
+    }
+
+    const raw = (data && data.content && data.content[0] && data.content[0].text) || '';
     const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
     let parsed;
     try {
       parsed = JSON.parse(clean);
     } catch {
+      // Fallback: extrai o objeto JSON de dentro de qualquer texto extra que o modelo tenha incluído.
+      const match = clean.match(/\{[\s\S]*\}/);
+      if (match) {
+        try { parsed = JSON.parse(match[0]); } catch { /* segue para a validação abaixo */ }
+      }
+    }
+
+    if (!parsed || typeof parsed !== 'object' || !parsed.plataformas) {
       return res.status(502).json({ error: 'Resposta inválida da IA. Tente novamente.' });
     }
 
