@@ -40,13 +40,50 @@ const ALLOWED_ORIGINS = [
   'https://rankeia-app.vercel.app',
 ];
 
+// Chave pública do Firebase Web (a mesma do js/config.js — não é segredo)
+const FIREBASE_WEB_API_KEY = 'AIzaSyC0CgcbZeGw9zmjBhyZF7MIIQkcSisyGaw';
+
+// Valida o ID token do Firebase sem depender do firebase-admin
+async function verifyFirebaseToken(idToken) {
+  const res = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_WEB_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken }),
+    }
+  );
+  if (!res.ok) return null;
+  const data = await res.json();
+  const user = data && data.users && data.users[0];
+  if (!user || user.disabled) return null;
+  return user.localId; // uid
+}
+
+// Rate limit por usuário (melhor esforço, por instância da função)
+const RATE_LIMIT = 10;          // gerações
+const RATE_WINDOW_MS = 60_000;  // por minuto
+const rateMap = new Map();
+
+function isRateLimited(uid) {
+  const now = Date.now();
+  const entry = rateMap.get(uid) || { count: 0, start: now };
+  if (now - entry.start > RATE_WINDOW_MS) {
+    entry.count = 0;
+    entry.start = now;
+  }
+  entry.count += 1;
+  rateMap.set(uid, entry);
+  return entry.count > RATE_LIMIT;
+}
+
 export default async function handler(req, res) {
   const origin = req.headers.origin || '';
   if (ALLOWED_ORIGINS.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
@@ -54,6 +91,18 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'Configuração do servidor incompleta' });
+
+  // Exige usuário autenticado — impede uso anônimo da API (e da sua chave)
+  const authHeader = req.headers.authorization || '';
+  const idToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  if (!idToken) return res.status(401).json({ error: 'Faça login para gerar anúncios.' });
+
+  const uid = await verifyFirebaseToken(idToken);
+  if (!uid) return res.status(401).json({ error: 'Sessão inválida. Faça login novamente.' });
+
+  if (isRateLimited(uid)) {
+    return res.status(429).json({ error: 'Muitas requisições. Aguarde um minuto e tente novamente.' });
+  }
 
   try {
     const { product, category, diff, platforms, tiktokScript } = req.body || {};

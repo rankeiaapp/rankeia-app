@@ -5,9 +5,16 @@
 
 async function gerarAnuncio({ product, category, diff, platforms, tiktokScript }) {
 
+  const user = firebase.auth().currentUser;
+  if (!user) throw new Error('Faça login para gerar anúncios.');
+  const idToken = await user.getIdToken();
+
   const response = await fetch('/api/gerar', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`,
+    },
     body: JSON.stringify({ product, category, diff, platforms, tiktokScript }),
   });
 
